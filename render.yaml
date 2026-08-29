@@ -1,9 +1,9 @@
 services:
-  # AI Cost Intelligence Backend Service
+  # 100% FREE TIER - AI Cost Intelligence Backend Service
   - type: web
     name: ai-cost-intelligence-backend
     runtime: node
-    plan: starter
+    plan: free
     region: oregon
     buildCommand: npm ci && npm run build --workspace=backend && npm run build --workspace=ai-analysis-engine && (npm run build --workspace=mcp-servers/azure-cost-mcp || true) && (npm run build --workspace=mcp-servers/aws-cost-mcp || true) && (npm run build --workspace=mcp-servers/gcp-cost-mcp || true)
     startCommand: npm run start --workspace=backend
@@ -19,15 +19,10 @@ services:
       - key: SKIP_DATABASE
         value: "false"
       - key: SKIP_REDIS
-        value: "false"
+        value: "true"
       - key: DATABASE_URL
         fromDatabase:
           name: cost-intelligence-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: cost-intelligence-redis
           property: connectionString
       - key: ANTHROPIC_API_KEY
         sync: false
@@ -38,18 +33,10 @@ services:
       - key: GCP_PROJECT_ID
         sync: false
 
-  # Redis Cache Instance
-  - type: redis
-    name: cost-intelligence-redis
-    plan: starter
-    region: oregon
-    maxmemoryPolicy: allkeys-lru
-    ipAllowList: [] # internal access only
-
 databases:
-  # PostgreSQL 16 Instance
+  # 100% FREE TIER - PostgreSQL 16 Instance (1GB Storage)
   - name: cost-intelligence-db
-    plan: starter
+    plan: free
     region: oregon
     databaseName: cost_optimization
     user: postgres
