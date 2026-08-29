@@ -23,8 +23,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "puppeteer-core": "^24.43.1",
+    "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
