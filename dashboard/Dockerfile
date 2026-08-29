@@ -4,10 +4,11 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 COPY dashboard/package.json ./dashboard/
-# Workspace needs these even if not used by dashboard
 COPY ai-analysis-engine/package.json ./ai-analysis-engine/
 COPY backend/package.json ./backend/
 COPY mcp-servers/azure-cost-mcp/package.json ./mcp-servers/azure-cost-mcp/
+COPY mcp-servers/aws-cost-mcp/package.json ./mcp-servers/aws-cost-mcp/
+COPY mcp-servers/gcp-cost-mcp/package.json ./mcp-servers/gcp-cost-mcp/
 
 RUN npm ci --ignore-scripts
 
@@ -17,7 +18,6 @@ WORKDIR /app
 
 COPY dashboard/ ./dashboard/
 
-# Build-time env for Next.js public vars
 ARG NEXT_PUBLIC_API_URL=http://localhost:8000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
@@ -32,7 +32,7 @@ ENV NODE_ENV=production
 # Copy standalone output
 COPY --from=build /app/dashboard/.next/standalone ./
 COPY --from=build /app/dashboard/.next/static ./dashboard/.next/static
-COPY --from=build /app/dashboard/public ./dashboard/public 2>/dev/null || true
+COPY --from=build /app/dashboard/public ./dashboard/public
 
 # Non-root user
 RUN addgroup -g 1001 -S appgroup && \

@@ -7,6 +7,8 @@ COPY package.json package-lock.json ./
 COPY ai-analysis-engine/package.json ./ai-analysis-engine/
 COPY backend/package.json ./backend/
 COPY mcp-servers/azure-cost-mcp/package.json ./mcp-servers/azure-cost-mcp/
+COPY mcp-servers/aws-cost-mcp/package.json ./mcp-servers/aws-cost-mcp/
+COPY mcp-servers/gcp-cost-mcp/package.json ./mcp-servers/gcp-cost-mcp/
 COPY dashboard/package.json ./dashboard/
 
 RUN npm ci --ignore-scripts
@@ -17,10 +19,12 @@ WORKDIR /app
 COPY ai-analysis-engine/ ./ai-analysis-engine/
 RUN npm run build --workspace=ai-analysis-engine
 
-# ---- Build MCP Server ----
+# ---- Build MCP Servers ----
 FROM build-ai AS build-mcp
 COPY mcp-servers/ ./mcp-servers/
 RUN npm run build --workspace=mcp-servers/azure-cost-mcp || true
+RUN npm run build --workspace=mcp-servers/aws-cost-mcp || true
+RUN npm run build --workspace=mcp-servers/gcp-cost-mcp || true
 
 # ---- Build Backend ----
 FROM build-mcp AS build-backend
@@ -38,6 +42,8 @@ COPY package.json package-lock.json ./
 COPY ai-analysis-engine/package.json ./ai-analysis-engine/
 COPY backend/package.json ./backend/
 COPY mcp-servers/azure-cost-mcp/package.json ./mcp-servers/azure-cost-mcp/
+COPY mcp-servers/aws-cost-mcp/package.json ./mcp-servers/aws-cost-mcp/
+COPY mcp-servers/gcp-cost-mcp/package.json ./mcp-servers/gcp-cost-mcp/
 COPY dashboard/package.json ./dashboard/
 
 RUN npm ci --omit=dev --ignore-scripts
