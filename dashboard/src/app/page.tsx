@@ -63,6 +63,21 @@ export default function Dashboard() {
     setActiveToasts((prev) => prev.filter((a) => a.id !== id))
   }
 
+  const handleRemediated = useCallback((alertId: string, savings: number) => {
+    setDashboardData((prev: any) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        overview: {
+          ...prev.overview,
+          alertsCount: Math.max(0, (prev.overview?.alertsCount || 1) - 1),
+          wasteIdentified: Math.max(0, (prev.overview?.wasteIdentified || 0) - Math.abs(savings)),
+          potentialSavings: (prev.overview?.potentialSavings || 0) + Math.abs(savings)
+        }
+      }
+    })
+  }, [])
+
   useEffect(() => {
     const loadRealData = async () => {
       setIsLoading(true)
@@ -237,6 +252,7 @@ export default function Dashboard() {
           <div className="space-y-8">
             <AlertsPanel
               alerts={dashboardData.alerts || []}
+              onRemediated={handleRemediated}
             />
 
             <PredictiveInsights
