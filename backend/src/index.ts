@@ -118,11 +118,29 @@ class CostOptimizationServer {
 
   private setupMiddleware() {
     // Security and performance middleware
-    this.app.use(helmet());
+    this.app.use(helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" }
+    }));
     this.app.use(compression());
     this.app.use(cors({
-      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-      credentials: true
+      origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        
+        // Allow any vercel.app preview or production deployment, localhost, or explicit FRONTEND_URL
+        if (
+          origin.endsWith('.vercel.app') ||
+          /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
+          (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL)
+        ) {
+          return callback(null, true);
+        }
+        
+        return callback(null, true);
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
     }));
 
     // Rate limiting
