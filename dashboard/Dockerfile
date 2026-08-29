@@ -21,6 +21,7 @@ COPY dashboard/ ./dashboard/
 ARG NEXT_PUBLIC_API_URL=http://localhost:8000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
+RUN mkdir -p /app/dashboard/public
 RUN npm run build --workspace=dashboard
 
 # ---- Production ----
