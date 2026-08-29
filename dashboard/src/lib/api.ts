@@ -113,6 +113,7 @@ export interface DashboardData {
   alerts: DashboardAlert[]
   predictions: DashboardPrediction[]
   metadata?: {
+    provider?: string
     subscriptionId: string
     dateRange: {
       start: string
@@ -232,9 +233,9 @@ class ApiClient {
   // FULL ANALYSIS
   // ==========================================================
 
-  getFullAnalysis() {
+  getFullAnalysis(provider: string = 'all') {
     return this.request<FullAnalysisResponse>(
-      '/api/full-analysis'
+      `/api/full-analysis?provider=${encodeURIComponent(provider)}`
     )
   }
 }
@@ -558,6 +559,6 @@ export function useApi() {
     getAzureCosts: () => apiClient.getAzureCosts(),
     getAIAnalysis: (query?: string, costData?: CostRecord[]) =>
       apiClient.getAIAnalysis(query, costData),
-    getFullAnalysis: () => apiClient.getFullAnalysis(),
+    getFullAnalysis: (provider?: string) => apiClient.getFullAnalysis(provider),
   }
 }

@@ -1,0 +1,24 @@
+{
+  "name": "gcp-cost-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for Google Cloud Billing, BigQuery Export, and Recommender API with AI-powered analysis",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": ["mcp", "gcp", "google-cloud", "cloud-billing", "recommender", "ai", "multi-cloud"],
+  "author": "Antigravity",
+  "license": "MIT"
+}
