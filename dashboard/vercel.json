@@ -4,7 +4,7 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://ai-cost-intelligence-backend.onrender.com",
-    "NEXT_PUBLIC_WS_URL": "wss://ai-cost-intelligence-backend.onrender.com"
+    "NEXT_PUBLIC_API_URL": "https://ai-cost-intelligence-backend-iupk.onrender.com",
+    "NEXT_PUBLIC_WS_URL": "wss://ai-cost-intelligence-backend-iupk.onrender.com"
   }
 }
