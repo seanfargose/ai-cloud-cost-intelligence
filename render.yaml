@@ -1,5 +1,5 @@
 services:
-  # AI Cost Intelligence Backend Service
+  # AI Cost Intelligence Backend Web Service (100% Free Tier - Zero Database Limit Errors)
   - type: web
     name: ai-cost-intelligence-backend
     runtime: node
@@ -17,18 +17,14 @@ services:
       - key: FRONTEND_URL
         value: https://ai-cloud-cost-intelligence.vercel.app
       - key: SKIP_DATABASE
-        value: "false"
+        value: "true"
       - key: SKIP_REDIS
         value: "true"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: cost-intelligence-db
-          property: connectionString
-
-databases:
-  # PostgreSQL Database Instance (Free Tier)
-  - name: cost-intelligence-db
-    plan: free
-    region: oregon
-    databaseName: cost_optimization
-    user: cost_admin
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: AWS_ROLE_ARN
+        sync: false
+      - key: AZURE_SUBSCRIPTION_ID
+        sync: false
+      - key: GCP_PROJECT_ID
+        sync: false
