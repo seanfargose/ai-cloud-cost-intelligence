@@ -1,0 +1,21 @@
+# ============================================================
+# Dashboard Service
+# ============================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard
+  namespace: cost-platform
+  labels:
+    app.kubernetes.io/name: dashboard
+    app.kubernetes.io/part-of: cost-platform
+    app.kubernetes.io/component: frontend
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: dashboard

@@ -1,0 +1,21 @@
+# ============================================================
+# Backend Service
+# ============================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: cost-platform
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: cost-platform
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: backend

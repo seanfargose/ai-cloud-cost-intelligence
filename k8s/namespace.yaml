@@ -1,0 +1,10 @@
+# ============================================================
+# Namespaces
+# ============================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cost-platform
+  labels:
+    app.kubernetes.io/part-of: cost-platform
+    app.kubernetes.io/managed-by: kubectl

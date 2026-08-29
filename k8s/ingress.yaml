@@ -1,0 +1,63 @@
+# ============================================================
+# Ingress — NGINX Ingress Controller with TLS
+# ============================================================
+# Prerequisites:
+#   1. Install NGINX Ingress Controller:
+#      helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+#        --namespace ingress-nginx --create-namespace
+#   2. Install cert-manager for automatic TLS:
+#      kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+#   3. Update the host values below with your actual domain
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cost-platform-ingress
+  namespace: cost-platform
+  labels:
+    app.kubernetes.io/part-of: cost-platform
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    # WebSocket support for backend
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+    # Rate limiting
+    nginx.ingress.kubernetes.io/limit-rps: "50"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+    # cert-manager TLS (uncomment when cert-manager is installed)
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  # Uncomment for TLS
+  # tls:
+  #   - hosts:
+  #       - app.example.com
+  #       - api.example.com
+  #     secretName: cost-platform-tls
+  rules:
+    # Dashboard (frontend)
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dashboard
+                port:
+                  number: 3000
+    # Backend API
+    - host: api.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000

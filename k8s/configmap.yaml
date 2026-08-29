@@ -1,0 +1,20 @@
+# ============================================================
+# ConfigMap — Non-sensitive configuration
+# ============================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cost-platform-config
+  namespace: cost-platform
+  labels:
+    app.kubernetes.io/part-of: cost-platform
+data:
+  NODE_ENV: "production"
+  PORT: "8000"
+  FRONTEND_URL: "https://app.example.com"
+  NEXT_PUBLIC_API_URL: "https://api.example.com"
+  ANTHROPIC_MODEL: "claude-haiku-4-5"
+  DB_NAME: "cost_optimization"
+  DB_PORT: "5432"
+  SKIP_DATABASE: "false"
+  SKIP_REDIS: "false"
