@@ -215,6 +215,9 @@ export default function Dashboard() {
         onTimeframeChange={setSelectedTimeframe}
         selectedProvider={selectedProvider}
         onProviderChange={setSelectedProvider}
+        totalSpend={dashboardData.overview?.totalSpend}
+        wasteIdentified={dashboardData.overview?.wasteIdentified}
+        potentialSavings={dashboardData.overview?.potentialSavings}
       />
 
       {/* MAIN */}

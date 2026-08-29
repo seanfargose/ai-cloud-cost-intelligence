@@ -113,6 +113,81 @@ export function dashboardCompatRoutes(aiAnalysisService: AIAnalysisService, real
     });
   });
 
+  // Enterprise FinOps CSV Report Export Endpoint
+  router.get("/reports/export-csv", (req, res) => {
+    const provider = String(req.query.provider || 'all').toLowerCase();
+    const records = generateMultiCloudCosts(provider);
+
+    const headers = [
+      "UsageDate",
+      "CloudProvider",
+      "ServiceName",
+      "Department",
+      "ResourceGroup",
+      "CostUSD",
+      "OptimizationOpportunity",
+      "EstimatedMonthlySavingsUSD"
+    ];
+
+    const rows = records.map((r, i) => {
+      const isWasteful = (i % 7 === 0);
+      const savings = isWasteful ? Math.round(r.cost * 0.42 * 100) / 100 : 0;
+      const opp = isWasteful ? "Underutilized instance / Idle resource" : "Optimized";
+      return [
+        r.date,
+        (r.provider || 'azure').toUpperCase(),
+        `"${r.service}"`,
+        `"${r.department}"`,
+        `"${r.resourceGroup}"`,
+        r.cost.toFixed(2),
+        `"${opp}"`,
+        savings.toFixed(2)
+      ].join(",");
+    });
+
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const filename = `finops-multicloud-report-${provider}-${new Date().toISOString().split('T')[0]}.csv`;
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.status(200).send(csvContent);
+  });
+
+  // Executive FinOps Summary Endpoint
+  router.get("/reports/executive-summary", (req, res) => {
+    const provider = String(req.query.provider || 'all').toLowerCase();
+    const records = generateMultiCloudCosts(provider);
+    const total = sum(records);
+
+    const byProvider: Record<string, number> = {};
+    const byDept: Record<string, number> = {};
+    for (const r of records) {
+      const p = r.provider || 'azure';
+      byProvider[p] = (byProvider[p] || 0) + r.cost;
+      byDept[r.department] = (byDept[r.department] || 0) + r.cost;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        reportGeneratedAt: new Date().toISOString(),
+        timeframe: 'Last 30 Days',
+        providerScope: provider,
+        totalSpendUSD: Math.round(total * 100) / 100,
+        wasteIdentifiedUSD: Math.round(total * 0.18 * 100) / 100,
+        potentialAnnualSavingsUSD: Math.round(total * 0.18 * 12 * 100) / 100,
+        providerBreakdown: byProvider,
+        departmentBreakdown: byDept,
+        topRecommendations: [
+          { title: "Convert On-Demand GPU clusters to AWS/GCP Spot + Reserved", savingsUSD: 18400, risk: "Low" },
+          { title: "Consolidate Azure Cosmos DB & Enable Serverless RU Scaling", savingsUSD: 12600, risk: "Low" },
+          { title: "Purge Unattached EBS / Persistent Disks across AWS & GCP", savingsUSD: 7400, risk: "Zero" },
+          { title: "Enable S3 & Cloud Storage Coldline Lifecycle Archival", savingsUSD: 5900, risk: "Zero" }
+        ]
+      }
+    });
+  });
+
   // Multi-Cloud Unified Cost Endpoint
   router.get("/multicloud/costs", async (req, res) => {
     const provider = String(req.query.provider || 'all').toLowerCase();
