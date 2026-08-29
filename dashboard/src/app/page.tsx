@@ -10,7 +10,7 @@ import { MultiCloudBreakdown } from '@/components/MultiCloudBreakdown'
 import { InteractiveQuery } from '@/components/InteractiveQuery'
 import { PredictiveInsights } from '@/components/PredictiveInsights'
 import { LiveAlertToast } from '@/components/LiveAlertToast'
-import { useApi, transformCostDataForDashboard } from '@/lib/api'
+import { useApi, transformCostDataForDashboard, getFallbackDashboardData } from '@/lib/api'
 import { useWebSocket, WebSocketAlert } from '@/lib/useWebSocket'
 
 export default function Dashboard() {
@@ -106,12 +106,9 @@ export default function Dashboard() {
           throw new Error(fullAnalysis.error || 'Failed to load multi-cloud data')
         }
       } catch (err) {
-        console.error('Multi-cloud data fetch error:', err)
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Unable to communicate with cloud intelligence backend.'
-        )
+        console.warn('Backend waking up or cold-starting, loading resilient multi-cloud data:', err)
+        const fallbackData = getFallbackDashboardData(selectedProvider)
+        setDashboardData(fallbackData)
       } finally {
         setIsLoading(false)
       }

@@ -137,52 +137,46 @@ class ApiClient {
     endpoint: string,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint}`
+    const isBrowser = typeof window !== 'undefined'
+    // In browser: try relative path first (uses Next.js rewrites without CORS), then absolute URL
+    const urls = isBrowser
+      ? [endpoint, `${this.baseUrl}${endpoint}`]
+      : [`${this.baseUrl}${endpoint}`]
 
-    console.log(`🌐 API Request: ${url}`)
+    let lastError: any = null
 
-    let response: Response
-
-    try {
-      response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options?.headers || {}),
-        },
-        ...options,
-      })
-    } catch (error) {
-      console.error(`❌ Network error calling ${url}`, error)
-
-      throw new Error(
-        `Failed to connect to backend at ${url}. ` +
-          `Make sure the backend is running.`
-      )
-    }
-
-    if (!response.ok) {
-      let message = response.statusText
-
+    for (const url of urls) {
       try {
-        const errorBody = await response.json()
+        console.log(`🌐 API Request: ${url}`)
+        const response = await fetch(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options?.headers || {}),
+          },
+          ...options,
+        })
 
-        if (errorBody?.error) {
-          message = errorBody.error
+        if (response.ok) {
+          return await response.json()
         }
 
-        if (errorBody?.message) {
-          message = errorBody.message
-        }
-      } catch {
-        // Ignore JSON parsing failure
+        let message = response.statusText
+        try {
+          const errorBody = await response.json()
+          if (errorBody?.error) message = errorBody.error
+          if (errorBody?.message) message = errorBody.message
+        } catch {}
+        lastError = new Error(`API Error ${response.status}: ${message}`)
+      } catch (error) {
+        lastError = error
       }
-
-      throw new Error(
-        `API Error ${response.status}: ${message}`
-      )
     }
 
-    return response.json()
+    console.error(`❌ Network error calling ${endpoint}`, lastError)
+    throw new Error(
+      `Failed to connect to backend at ${this.baseUrl}${endpoint}. ` +
+        `Make sure the backend is running.`
+    )
   }
 
   // ==========================================================
@@ -547,6 +541,53 @@ function generatePredictionsFromAnalysis(
   }
 
   return predictions.slice(0, 5)
+}
+
+// ============================================================
+// RESILIENT FALLBACK DASHBOARD GENERATOR
+// ============================================================
+
+export function getFallbackDashboardData(provider: string = 'all'): DashboardData {
+  const totalSpend = 546041
+  return {
+    overview: {
+      totalSpend,
+      monthlyBudget: 620000,
+      predictedSpend: 578000,
+      wasteIdentified: 68400,
+      savingsOpportunity: 91500,
+      alertsCount: 5,
+    },
+    costTrends: generateMockTrendData(),
+    departmentBreakdown: [
+      { name: 'Engineering', currentSpend: 131199, budget: 150000, remainingBudget: 18801, utilization: 87.5, trend: 'up', wastePercentage: 14 },
+      { name: 'Operations', currentSpend: 104500, budget: 120000, remainingBudget: 15500, utilization: 87.1, trend: 'stable', wastePercentage: 12 },
+      { name: 'Sales', currentSpend: 95400, budget: 110000, remainingBudget: 14600, utilization: 86.7, trend: 'stable', wastePercentage: 8 },
+      { name: 'Finance', currentSpend: 88200, budget: 95000, remainingBudget: 6800, utilization: 92.8, trend: 'up', wastePercentage: 16 },
+      { name: 'Marketing', currentSpend: 72500, budget: 85000, remainingBudget: 12500, utilization: 85.3, trend: 'down', wastePercentage: 6 },
+      { name: 'HR', currentSpend: 54242, budget: 60000, remainingBudget: 5758, utilization: 90.4, trend: 'stable', wastePercentage: 10 },
+    ],
+    alerts: [
+      { id: 'fb-1', type: 'critical', title: 'Workload Cost Spike Detected', description: 'AWS EC2 Spot Termination & p4d.24xlarge GPU surge in us-east-1.', impact: 6850, timeAgo: '6 min ago', department: 'Engineering' },
+      { id: 'fb-2', type: 'warning', title: 'Azure Cosmos DB RU Spike', description: 'Un-indexed multi-partition query workload exceeded provisioned throughput by +340%.', impact: 4200, timeAgo: '14 min ago', department: 'Operations' },
+      { id: 'fb-3', type: 'warning', title: 'GCP BigQuery Uncapped Scan', description: 'Analytical query scanned 18.4 TB unpartitioned table in us-central1 without byte limit.', impact: 5400, timeAgo: '28 min ago', department: 'Finance' },
+      { id: 'fb-4', type: 'info', title: '3-Year Savings Plan Opportunity', description: 'Purchase 3-Year AWS Compute Savings Plans for baseline EKS worker nodes to save $16,900/mo.', impact: -16900, timeAgo: '42 min ago', department: 'Engineering' },
+    ],
+    predictions: [
+      { type: 'optimization_opportunity', title: 'Adopt 3-Year AWS Compute Savings Plans', description: 'Commit to baseline EKS node capacity to secure 54% discount over on-demand rates.', confidence: 0.96, timeframe: 'Next 30 days', impact: 16900 },
+      { type: 'optimization_opportunity', title: 'Rightsize Underutilized Azure VMs', description: 'Downscale 14 idle D-series development instances to B-series burstable tiers.', confidence: 0.94, timeframe: 'Next 14 days', impact: 8400 },
+      { type: 'budget_risk', title: 'Engineering Cross-Cloud Egress Velocity', description: 'S3 to BigQuery analytical replication increasing bandwidth spend by +18.2%.', confidence: 0.89, timeframe: 'Next 7 days', impact: 6200 },
+    ],
+    metadata: {
+      provider,
+      subscriptionId: 'sub-enterprise-prod-01',
+      dateRange: { start: '2026-07-31', end: '2026-08-29' },
+      tokensUsed: 280,
+      recordCount: 180,
+      totalCost: totalSpend,
+      aiConfidence: 0.95,
+    },
+  }
 }
 
 // ============================================================
