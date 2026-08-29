@@ -1,10 +1,22 @@
 # AI-Powered Cloud Cost Intelligence Platform
 
-An end-to-end cloud cost intelligence dashboard for analyzing Azure-style infrastructure spend, detecting anomalies, forecasting trends, and turning cost data into actionable optimization recommendations with Claude.
+> **Live Multi-Cloud Production Dashboard:** [https://ai-cloud-cost-intelligence-dashboard-git-main-sean-912c.vercel.app](https://ai-cloud-cost-intelligence-dashboard-git-main-sean-912c.vercel.app)  
+> **Master Architectural Guide (17 Pages):** [AI_Cloud_Cost_Intelligence_Platform_Master_Guide.pdf](./AI_Cloud_Cost_Intelligence_Platform_Master_Guide.pdf)  
+> **Master Markdown Documentation:** [PLATFORM_MASTER_DOCUMENTATION.md](./PLATFORM_MASTER_DOCUMENTATION.md)  
+
+---
+
+## 🎬 Multi-Cloud Live Demo Walkthrough
+
+![Multi-Cloud Ecosystem Demo](./multi_cloud_ecosystem_demo.gif)
+
+*Demonstrating multi-cloud telemetry switching across **AWS**, **Microsoft Azure**, and **Google Cloud Platform (GCP)**, real-time WebSocket anomaly detection, and 1-click transactional AI remediation.*
+
+---
 
 ## What this project does
 
-The platform combines a Next.js dashboard, Express/TypeScript API, an AI analysis engine, and an Azure Cost Management MCP server.
+The platform unifies **$546K/month in multi-cloud infrastructure spend** across AWS, Azure, and GCP, combining a Next.js 14 dashboard, Express/TypeScript API, Model Context Protocol (MCP) tool servers, and Claude 3.5 Sonnet AI reasoning.
 
 ### Core capabilities
 
