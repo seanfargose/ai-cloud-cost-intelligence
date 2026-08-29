@@ -1,11 +1,11 @@
 services:
-  # 100% FREE TIER - AI Cost Intelligence Backend Service
+  # AI Cost Intelligence Backend Service
   - type: web
     name: ai-cost-intelligence-backend
     runtime: node
     plan: free
     region: oregon
-    buildCommand: npm ci && npm run build --workspace=backend && npm run build --workspace=ai-analysis-engine && (npm run build --workspace=mcp-servers/azure-cost-mcp || true) && (npm run build --workspace=mcp-servers/aws-cost-mcp || true) && (npm run build --workspace=mcp-servers/gcp-cost-mcp || true)
+    buildCommand: npm ci && npm run build --workspace=backend && npm run build --workspace=ai-analysis-engine
     startCommand: npm run start --workspace=backend
     healthCheckPath: /health
     autoDeploy: true
@@ -24,20 +24,11 @@ services:
         fromDatabase:
           name: cost-intelligence-db
           property: connectionString
-      - key: ANTHROPIC_API_KEY
-        sync: false
-      - key: AWS_ROLE_ARN
-        sync: false
-      - key: AZURE_SUBSCRIPTION_ID
-        sync: false
-      - key: GCP_PROJECT_ID
-        sync: false
 
 databases:
-  # 100% FREE TIER - PostgreSQL 16 Instance (1GB Storage)
+  # PostgreSQL Database Instance
   - name: cost-intelligence-db
     plan: free
     region: oregon
     databaseName: cost_optimization
     user: postgres
-    postgresMajorVersion: 16
