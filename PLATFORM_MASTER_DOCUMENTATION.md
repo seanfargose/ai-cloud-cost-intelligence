@@ -375,6 +375,11 @@ Features 4 enterprise personas with distinct viewport lenses:
 - **Root Cause:** Free-tier cloud instances spin down after 15 minutes of inactivity and take ~30s to wake up.
 - **Solution:** Built dual-mode URL resolution and instant fallback data hydration in `api.ts` and `page.tsx`, allowing the dashboard to render immediately while quietly connecting to live WebSockets in the background.
 
+### Bug 7: Missing `output: 'standalone'` in Next.js Docker Container Build
+- **Error:** `buildx failed with: ERROR: failed to build: failed to compute cache key: failed to calculate checksum: "/app/dashboard/.next/standalone": not found`.
+- **Root Cause:** `dashboard/Dockerfile` used `COPY --from=build /app/dashboard/.next/standalone ./` for minimal production image sizing. However, Next.js does not generate the `.next/standalone` folder by default unless `output: 'standalone'` is explicitly enabled in `next.config.js`.
+- **Solution:** Added `output: 'standalone'` inside `nextConfig` in `dashboard/next.config.js`. Verified build creates `.next/standalone/dashboard/server.js` and multi-stage Docker build passes cleanly with exit code 0.
+
 ---
 
 ## 12. Master Interview Defense Manual: 15 Exhaustive Q&A
