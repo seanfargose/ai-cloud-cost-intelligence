@@ -160,6 +160,27 @@ class CostOptimizationServer {
   }
 
   private setupRoutes() {
+    // Root API index & info
+    this.app.get('/', (req, res) => {
+      res.json({
+        name: 'AI-Powered Cloud Cost Intelligence Platform API',
+        status: 'online',
+        version: '1.0.0',
+        environment: process.env.NODE_ENV || 'production',
+        endpoints: {
+          health: '/health',
+          fullAnalysis: '/api/full-analysis?provider=all',
+          costs: '/api/costs',
+          analysis: '/api/analysis',
+          optimization: '/api/optimization',
+          alerts: '/api/alerts',
+          dashboard: '/api/dashboard',
+          websocket: 'wss://' + req.get('host')
+        },
+        timestamp: new Date().toISOString()
+      });
+    });
+
     // Health check — returns 503 when critical services are down
     this.app.get('/health', (req, res) => {
       const services = {
