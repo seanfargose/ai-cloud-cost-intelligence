@@ -59,8 +59,8 @@ jobs:
           tags: |
             ${{ env.ACR_NAME }}.azurecr.io/cost-platform-backend:${{ github.sha }}
             ${{ env.ACR_NAME }}.azurecr.io/cost-platform-backend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend,ignore-error=true
 
       - name: Build & push dashboard
         uses: docker/build-push-action@v5
@@ -73,8 +73,8 @@ jobs:
             ${{ env.ACR_NAME }}.azurecr.io/cost-platform-dashboard:latest
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=dashboard
+          cache-to: type=gha,mode=max,scope=dashboard,ignore-error=true
 
   terraform:
     name: Terraform Apply

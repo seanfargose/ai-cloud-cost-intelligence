@@ -84,8 +84,8 @@ jobs:
           file: backend/Dockerfile
           push: false
           tags: cost-platform-backend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend,ignore-error=true
 
       - name: Build dashboard image
         uses: docker/build-push-action@v5
@@ -96,5 +96,5 @@ jobs:
           tags: cost-platform-dashboard:${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_API_URL=https://api.example.com
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=dashboard
+          cache-to: type=gha,mode=max,scope=dashboard,ignore-error=true
