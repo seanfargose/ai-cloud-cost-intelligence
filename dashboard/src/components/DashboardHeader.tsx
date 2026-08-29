@@ -11,9 +11,11 @@ import {
   Moon,
   Cloud,
   FileText,
-  Download
+  Download,
+  Key
 } from 'lucide-react'
 import { FinOpsReportModal } from '@/components/FinOpsReportModal'
+import { CloudConnectModal } from '@/components/CloudConnectModal'
 
 interface DashboardHeaderProps {
   selectedTimeframe: string
@@ -37,6 +39,7 @@ export function DashboardHeader({
   const [notificationCount] = useState(7)
   const [darkMode, setDarkMode] = useState(false)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
 
   const timeframes = [
     { value: '24h', label: 'Last 24 Hours' },
@@ -73,6 +76,11 @@ export function DashboardHeader({
         potentialSavings={potentialSavings}
       />
 
+      <CloudConnectModal
+        isOpen={isConnectModalOpen}
+        onClose={() => setIsConnectModalOpen(false)}
+      />
+
       <header className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
         {/* MAIN HEADER */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -96,12 +104,20 @@ export function DashboardHeader({
             </div>
 
             {/* RIGHT SIDE - CONTROLS */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <button
+                onClick={() => setIsConnectModalOpen(true)}
+                className="flex items-center space-x-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-xs font-bold transition-all border border-gray-300 dark:border-gray-700 shadow-sm"
+              >
+                <Key className="w-3.5 h-3.5 text-amber-500" />
+                <span>Connect Cloud IAM</span>
+              </button>
+
               <button
                 onClick={() => setIsReportModalOpen(true)}
-                className="flex items-center space-x-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-105 active:scale-95"
+                className="flex items-center space-x-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-105 active:scale-95"
               >
-                <FileText className="w-4 h-4 text-indigo-200" />
+                <FileText className="w-3.5 h-3.5 text-indigo-200" />
                 <span>Export FinOps Report</span>
               </button>
 
