@@ -6,6 +6,7 @@ import { MetricsOverview } from '@/components/MetricsOverview'
 import { CostTrendsChart } from '@/components/CostTrendsChart'
 import { AlertsPanel } from '@/components/AlertsPanel'
 import { DepartmentBreakdown } from '@/components/DepartmentBreakdown'
+import { MultiCloudBreakdown } from '@/components/MultiCloudBreakdown'
 import { InteractiveQuery } from '@/components/InteractiveQuery'
 import { PredictiveInsights } from '@/components/PredictiveInsights'
 import { useApi, transformCostDataForDashboard } from '@/lib/api'
@@ -172,6 +173,11 @@ export default function Dashboard() {
 
             <DepartmentBreakdown
               departments={dashboardData.departmentBreakdown || []}
+            />
+
+            <MultiCloudBreakdown
+              currentProvider={selectedProvider}
+              totalSpend={dashboardData.overview?.totalSpend || 0}
             />
 
             <InteractiveQuery />
