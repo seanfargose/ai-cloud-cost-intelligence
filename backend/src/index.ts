@@ -25,6 +25,7 @@ import { dashboardRoutes } from './routes/dashboard.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { requestLogger } from './middleware/request-logger.js';
 import { dashboardCompatRoutes } from "./routes/dashboard-compat.js";
+import { authRoutes } from "./routes/auth.js";
 
 
 dotenv.config({
@@ -288,6 +289,9 @@ class CostOptimizationServer {
 
     // Compatibility endpoints for frontend
     this.app.use('/api', dashboardCompatRoutes(this.aiAnalysisService, this.realtimeService));
+
+    // Authentication & RBAC routes
+    this.app.use('/api/auth', authRoutes());
 
     // 404 handler — must come before errorHandler
     this.app.use('*', (req, res) => {

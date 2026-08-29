@@ -12,8 +12,10 @@ import { PredictiveInsights } from '@/components/PredictiveInsights'
 import { LiveAlertToast } from '@/components/LiveAlertToast'
 import { useApi, transformCostDataForDashboard, getFallbackDashboardData } from '@/lib/api'
 import { useWebSocket, WebSocketAlert } from '@/lib/useWebSocket'
+import { useAuth } from '@/lib/auth'
 
 export default function Dashboard() {
+  const { user } = useAuth()
   const [dashboardData, setDashboardData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTimeframe, setSelectedTimeframe] = useState('30d')
@@ -219,6 +221,45 @@ export default function Dashboard() {
 
       {/* MAIN */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* ROLE-AWARE WELCOME BANNER */}
+        {user && (
+          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-slate-900/90 dark:from-slate-900 dark:to-slate-950 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3.5">
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="w-11 h-11 rounded-full object-cover ring-2 ring-primary-500/40 shadow-sm shrink-0"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
+                    Welcome back, {user.name}
+                  </h2>
+                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border ${user.badgeColor}`}>
+                    {user.roleTitle}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                  {user.role === 'cfo'
+                    ? '📊 Viewing executive macro forecasts, ROI targets, and cross-cloud budget velocity.'
+                    : user.role === 'cloud_architect'
+                    ? '⚡ Viewing Kubernetes cluster utilization, egress metrics, and infrastructure rightsizing.'
+                    : user.role === 'engineering_lead'
+                    ? '🛠️ Viewing team compute allocations, microservice spend, and workload governance.'
+                    : '🎯 Viewing multi-cloud unit economics, commitment discounts, and real-time anomaly triage.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 text-xs">
+              <span className="text-gray-500 dark:text-gray-400 hidden lg:inline">Organization:</span>
+              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800 font-semibold text-gray-800 dark:text-slate-200 border border-gray-200 dark:border-slate-700">
+                {user.organization}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* METRICS */}
         <div className="mb-8">
           <MetricsOverview
