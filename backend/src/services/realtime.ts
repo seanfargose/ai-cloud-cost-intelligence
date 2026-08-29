@@ -322,6 +322,43 @@ export class RealtimeService extends EventEmitter {
   }
 
   /**
+   * Broadcast anomaly alert to all connected dashboard clients
+   */
+  public broadcastAnomalyAlert(alert: {
+    id?: string;
+    type?: 'critical' | 'warning' | 'info';
+    provider?: 'aws' | 'azure' | 'gcp';
+    title: string;
+    description: string;
+    impact: number;
+    department?: string;
+    timeAgo?: string;
+  }): void {
+    const alertPayload = {
+      id: alert.id || `live-anom-${Date.now()}`,
+      type: alert.type || 'critical',
+      provider: alert.provider || 'aws',
+      title: alert.title,
+      description: alert.description,
+      impact: alert.impact,
+      department: alert.department || 'Engineering',
+      timeAgo: 'Just now',
+      timestamp: new Date().toISOString()
+    };
+
+    this.broadcast('anomaly_alert', alertPayload, 'anomaly_alerts');
+    // Also broadcast to general listeners
+    this.broadcast('live_alert', alertPayload);
+  }
+
+  /**
+   * Broadcast live multi-cloud telemetry update
+   */
+  public broadcastLiveTelemetry(telemetry: any): void {
+    this.broadcast('telemetry_update', telemetry, 'cost_updates');
+  }
+
+  /**
    * Send message to specific client
    */
   private sendToClient(clientId: string, message: any): boolean {

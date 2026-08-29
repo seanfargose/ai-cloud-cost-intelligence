@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AIAnalysisService } from "../services/ai-analysis.js";
+import { RealtimeService } from "../services/realtime.js";
 
 interface CostRecord {
   date: string;
@@ -10,8 +11,61 @@ interface CostRecord {
   provider?: 'azure' | 'aws' | 'gcp';
 }
 
-export function dashboardCompatRoutes(aiAnalysisService: AIAnalysisService) {
+export function dashboardCompatRoutes(aiAnalysisService: AIAnalysisService, realtimeService?: RealtimeService) {
   const router = Router();
+
+  // Simulate Anomaly Endpoint for Live WebSocket testing
+  router.post("/simulate-anomaly", async (req, res) => {
+    const provider = (req.body?.provider || ['aws', 'azure', 'gcp'][Math.floor(Math.random() * 3)]) as 'aws' | 'azure' | 'gcp';
+    const sampleAnomalies = [
+      {
+        provider: 'aws' as const,
+        title: 'AWS EC2 Spot Termination & p4d.24xlarge Surge',
+        description: 'Auto-scaling triggered 4x on-demand GPU instances in us-east-1 after Spot capacity interruption.',
+        impact: 6850,
+        department: 'Engineering'
+      },
+      {
+        provider: 'azure' as const,
+        title: 'Azure Cosmos DB Request Unit (RU) Spike',
+        description: 'Un-indexed multi-partition query workload exceeded provisioned throughput by +340%.',
+        impact: 4200,
+        department: 'Platform'
+      },
+      {
+        provider: 'gcp' as const,
+        title: 'GCP BigQuery Uncapped Analytics Scan',
+        description: 'Single analytical report scanned 18.4 TB unpartitioned table in us-central1 without byte limit.',
+        impact: 5400,
+        department: 'Data Analytics'
+      }
+    ];
+
+    const selected = sampleAnomalies.find(a => a.provider === provider) || sampleAnomalies[0];
+    const alert = {
+      id: `anom-${Date.now()}`,
+      type: 'critical' as const,
+      provider: selected.provider,
+      title: req.body?.title || selected.title,
+      description: req.body?.description || selected.description,
+      impact: req.body?.impact || selected.impact,
+      department: req.body?.department || selected.department,
+      timeAgo: 'Just now'
+    };
+
+    if (realtimeService) {
+      realtimeService.broadcastAnomalyAlert(alert);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        alert,
+        broadcasted: !!realtimeService
+      },
+      message: 'Real-time multi-cloud anomaly broadcasted via WebSocket'
+    });
+  });
 
   // Multi-Cloud Unified Cost Endpoint
   router.get("/multicloud/costs", async (req, res) => {

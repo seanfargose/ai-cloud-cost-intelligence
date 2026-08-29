@@ -248,7 +248,7 @@ class CostOptimizationServer {
     ));
 
     // Compatibility endpoints for frontend
-    this.app.use('/api', dashboardCompatRoutes(this.aiAnalysisService));
+    this.app.use('/api', dashboardCompatRoutes(this.aiAnalysisService, this.realtimeService));
 
     // 404 handler — must come before errorHandler
     this.app.use('*', (req, res) => {

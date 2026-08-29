@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DashboardHeader } from '@/components/DashboardHeader'
 import { MetricsOverview } from '@/components/MetricsOverview'
 import { CostTrendsChart } from '@/components/CostTrendsChart'
@@ -9,7 +9,9 @@ import { DepartmentBreakdown } from '@/components/DepartmentBreakdown'
 import { MultiCloudBreakdown } from '@/components/MultiCloudBreakdown'
 import { InteractiveQuery } from '@/components/InteractiveQuery'
 import { PredictiveInsights } from '@/components/PredictiveInsights'
+import { LiveAlertToast } from '@/components/LiveAlertToast'
 import { useApi, transformCostDataForDashboard } from '@/lib/api'
+import { useWebSocket, WebSocketAlert } from '@/lib/useWebSocket'
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null)
@@ -17,8 +19,49 @@ export default function Dashboard() {
   const [selectedTimeframe, setSelectedTimeframe] = useState('30d')
   const [selectedProvider, setSelectedProvider] = useState('all')
   const [error, setError] = useState<string | null>(null)
+  const [activeToasts, setActiveToasts] = useState<WebSocketAlert[]>([])
 
   const api = useApi()
+
+  // Real-time WebSocket Alert Handler
+  const handleLiveAlert = useCallback((alert: WebSocketAlert) => {
+    console.log('⚡ Received real-time anomaly alert:', alert)
+    setActiveToasts((prev) => [alert, ...prev.slice(0, 4)])
+
+    // Dynamically prepend to dashboard alerts list
+    setDashboardData((prevData: any) => {
+      if (!prevData) return prevData
+
+      const newAlert = {
+        id: alert.id,
+        type: alert.type,
+        title: alert.title,
+        description: alert.description,
+        impact: alert.impact,
+        timeAgo: 'Just now',
+        department: alert.department || 'Engineering'
+      }
+
+      return {
+        ...prevData,
+        overview: {
+          ...prevData.overview,
+          alertsCount: (prevData.overview?.alertsCount || 0) + 1,
+          wasteIdentified: (prevData.overview?.wasteIdentified || 0) + alert.impact
+        },
+        alerts: [newAlert, ...(prevData.alerts || [])].slice(0, 10)
+      }
+    })
+  }, [])
+
+  const { isConnected } = useWebSocket({
+    onAlert: handleLiveAlert,
+    enabled: true
+  })
+
+  const handleDismissToast = (id: string) => {
+    setActiveToasts((prev) => prev.filter((a) => a.id !== id))
+  }
 
   useEffect(() => {
     const loadRealData = async () => {
@@ -118,13 +161,20 @@ export default function Dashboard() {
     : selectedProvider.toUpperCase()
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 transition-colors duration-200 relative">
+      {/* REAL-TIME WEBSOCKET ANOMALY TOAST NOTIFICATIONS */}
+      <LiveAlertToast
+        alerts={activeToasts}
+        onDismiss={handleDismissToast}
+        isWsConnected={isConnected}
+      />
+
       {/* MULTI-CLOUD STATUS BAR */}
       <div className="bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-purple-900/10 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-purple-950/40 border-b border-indigo-200/50 dark:border-indigo-900/50 px-4 py-2 text-xs">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1.5 font-medium text-indigo-700 dark:text-indigo-300">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
               <span>Multi-Cloud Mode: <strong>{providerLabel}</strong></span>
             </div>
             <span className="text-gray-400 dark:text-gray-600">•</span>
@@ -138,7 +188,7 @@ export default function Dashboard() {
               AI Confidence: <strong>{((dashboardData.metadata?.aiConfidence || 0.95) * 100).toFixed(0)}%</strong>
             </span>
             <span className="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold">
-              MULTI-CLOUD ACTIVE
+              {isConnected ? 'LIVE WEBSOCKET STREAM' : 'MULTI-CLOUD ACTIVE'}
             </span>
           </div>
         </div>
@@ -227,9 +277,9 @@ export default function Dashboard() {
             </div>
 
             <div className="p-3 bg-gray-50 dark:bg-slate-800/60 rounded-lg">
-              <span className="text-gray-500 dark:text-gray-400 font-medium">AI Optimization Engine</span>
+              <span className="text-gray-500 dark:text-gray-400 font-medium">WebSocket Event Stream</span>
               <p className="font-semibold text-indigo-600 dark:text-indigo-400 mt-1 font-mono">
-                Active (Claude / Multi-Cloud)
+                {isConnected ? 'Active (ws://localhost:8000)' : 'Connecting...'}
               </p>
             </div>
           </div>
