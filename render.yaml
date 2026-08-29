@@ -26,9 +26,9 @@ services:
           property: connectionString
 
 databases:
-  # PostgreSQL Database Instance
+  # PostgreSQL Database Instance (Free Tier)
   - name: cost-intelligence-db
     plan: free
     region: oregon
     databaseName: cost_optimization
-    user: postgres
+    user: cost_admin
